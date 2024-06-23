@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stable Diffusion Ratio Finder</title>
+    <style>
+        a {
+            color: #39a14f;
+        }
+        a:visited {
+            color: #3f65a1;
+        }
+        body {
+            background-color: #383838;
+            color: #d5d5d5;
+            font-family: "DejaVu Sans",serif;
+            font-size: 120%;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 30px;
+        }
+    </style>
+    <script>
+        function calculate() {
+            let targetWidth = document.getElementById('target_width').value;
+            let targetHeight = document.getElementById('target_height').value;
+            let aspectRatio = targetWidth / targetHeight;
+            let targetLatentPixels = 1000000; // 1 megapixel
+
+            // find the height
+            let perfectHeight = Math.sqrt(targetLatentPixels / aspectRatio);
+            let perfectWidth = targetLatentPixels / perfectHeight;
+
+            // need to find the next highest width that is a multiple of 64
+            let correctedWidth = Math.round(perfectWidth / 64) * 64;
+            // if the division isn't perfectly even, add a 64 to "round up" to the nearest 64 multiple
+            if (perfectWidth % 64 > 0) {
+                correctedWidth += 64;
+            }
+
+            // same for height
+            let correctedHeight = Math.round(perfectHeight / 64) * 64;
+            if (perfectHeight % 64 > 0) {
+                correctedHeight += 64;
+            }
+
+            let upscaleRatio = Math.round(targetWidth / correctedWidth * 100) / 100;
+
+            let actualWidth = Math.round(correctedWidth * upscaleRatio);
+            let actualHeight = Math.round(correctedHeight * upscaleRatio);
+
+            document.getElementById('latent_width').innerText = correctedWidth;
+            document.getElementById('latent_height').innerText = correctedHeight;
+            document.getElementById('target_pixels').innerText = targetWidth * targetHeight;
+            document.getElementById('latent_pixels').innerText = correctedWidth * correctedHeight;
+            document.getElementById('upscale_ratio').innerText = upscaleRatio;
+            document.getElementById('end_width').innerText = actualWidth;
+            document.getElementById('end_height').innerText = actualHeight;
+            document.getElementById('end_pixels').innerText = actualWidth * actualHeight;
+        }
+
+        window.onload = function() {
+            calculate();
+        };
+    </script>
+</head>
+<body>
+<header>
+    <h3>
+        Stable Diffusion Ratio Finder
+    </h3>
+    <p>
+        Tool to help find optimal latent image sizes in order to achieve your end goal image size. Tries to target about
+        1 megapixel initial latent size, keeps dimensions constrained to multiples of 64, and tells you the upscale
+        factor you need in order to get your final desired image size.
+        The upscale factor can be used in a node like <a href="https://github.com/ssitu/ComfyUI_UltimateSDUpscale"
+                                                         target="_blank">Ultimate SD Upscale</a> for ComfyUI, or the <a
+            href="https://github.com/Coyote-A/ultimate-upscale-for-automatic1111" target="_blank">Ultimate SD
+        Upscale</a> extension for Automatic1111. If it's important to have exact dimensions, you will have to crop the image afterward.
+    </p>
+</header>
+<section>
+    <label>Target Width: <input type="number" id="target_width" value="1920" oninput="calculate()" /></label><br />
+    <label>Target Height: <input type="number" id="target_height" value="1080" oninput="calculate()" /></label>
+</section>
+<section>
+    <ul>
+        <li>Target Pixels: <i id="target_pixels"></i></li>
+        <li>Latent Width: <i id="latent_width"></i></li>
+        <li>Latent Height: <i id="latent_height"></i></li>
+        <li>Latent Pixels: <i id="latent_pixels"></i></li>
+        <li>Upscale Ratio: <i id="upscale_ratio"></i></li>
+        <li>End Width: <i id="end_width"></i></li>
+        <li>End Height: <i id="end_height"></i></li>
+        <li>End Pixels: <i id="end_pixels"></i></li>
+    </ul>
+</section>
+</body>
+</html>
