@@ -27,8 +27,9 @@
         function calculate() {
             let targetWidth = document.getElementById('target_width').value;
             let targetHeight = document.getElementById('target_height').value;
+            let targetMP = document.getElementById('target_mp').value;
             let aspectRatio = targetWidth / targetHeight;
-            let targetLatentPixels = 1000000; // 1 megapixel
+            let targetLatentPixels = targetMP * 1000000; // 1 megapixel
 
             // find the height
             let perfectHeight = Math.sqrt(targetLatentPixels / aspectRatio);
@@ -49,6 +50,9 @@
 
             let upscaleRatio = Math.round(targetWidth / correctedWidth * 100) / 100;
 
+            // find the correct "upscale" downscale if it's been upscaled by 4x
+            let downscaleRatio = Math.round(targetWidth / (correctedWidth * 4) * 100) / 100;
+
             let actualWidth = Math.round(correctedWidth * upscaleRatio);
             let actualHeight = Math.round(correctedHeight * upscaleRatio);
 
@@ -57,6 +61,7 @@
             document.getElementById('target_pixels').innerText = targetWidth * targetHeight;
             document.getElementById('latent_pixels').innerText = correctedWidth * correctedHeight;
             document.getElementById('upscale_ratio').innerText = upscaleRatio;
+            document.getElementById('downscale_ratio').innerText = downscaleRatio;
             document.getElementById('end_width').innerText = actualWidth;
             document.getElementById('end_height').innerText = actualHeight;
             document.getElementById('end_pixels').innerText = actualWidth * actualHeight;
@@ -84,7 +89,8 @@
 </header>
 <section>
     <label>Target Width: <input type="number" id="target_width" value="1920" oninput="calculate()" /></label><br />
-    <label>Target Height: <input type="number" id="target_height" value="1080" oninput="calculate()" /></label>
+    <label>Target Height: <input type="number" id="target_height" value="1080" oninput="calculate()" /></label><br />
+    <label>Target Latent Megapixels (SDXL works well at ~1): <input type="number" id="target_mp" value="1" oninput="calculate()" /></label>
 </section>
 <section>
     <ul>
@@ -93,6 +99,7 @@
         <li>Latent Height: <i id="latent_height"></i></li>
         <li>Latent Pixels: <i id="latent_pixels"></i></li>
         <li>Upscale Ratio: <i id="upscale_ratio"></i></li>
+        <li>Downscale Ratio (decimal to "upscale" by if the image has been upscaled 4x): <i id="downscale_ratio"></i></li>
         <li>End Width: <i id="end_width"></i></li>
         <li>End Height: <i id="end_height"></i></li>
         <li>End Pixels: <i id="end_pixels"></i></li>
